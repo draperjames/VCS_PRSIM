@@ -1,0 +1,64 @@
+export template <pint N>
+deftype rail_1ofN <: int (bool d[N])
+{
+	set { }
+	get { }
+}
+
+export deftype dualrail <: int (rail_1ofN<2> base; bool d[2], t, f)
+{
+	base.d = d;
+	d[0] = f;
+	d[1] = t;
+
+	set { }
+	get { }
+}
+
+export deftype trirail <: int (rail_1ofN<3> base; bool d[3], t, f, c)
+{
+	base.d = d;
+	d[0] = f;
+	d[1] = t;
+	d[2] = c;
+
+	set { }
+	get { }
+}
+
+export deftype quadrail <: int (rail_1ofN<4> base; bool d[4], ff, ft, tf, tt)
+{
+	base.d = d;
+	d[0] = ff;
+	d[1] = ft;
+	d[2] = tf;
+	d[3] = tt;
+
+	set { }
+	get { }
+}
+
+export template <pint M>
+defproc dualrail_adapter(rail_1ofN<2> left[M]; dualrail right[M])
+{
+	(;i:M:
+		left[i] = right[i].base;
+	)
+}
+
+export template <pint M>
+defproc trirail_adapter(rail_1ofN<3> left[M]; trirail right[M])
+{
+	(;i:M:
+		left[i] = right[i].base;
+	)
+}
+
+export template <pint M>
+defproc quadrail_adapter(rail_1ofN<4> left[M]; quadrail right[M])
+{
+	(;i:M:
+		left[i] = right[i].base;
+	)
+}
+

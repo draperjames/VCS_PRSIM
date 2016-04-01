@@ -1,0 +1,22 @@
+import "globals.act";
+import "encoding.act";
+import "channel.act";
+import "environment.act";
+
+export defproc delay( globals g; bool in,out )
+{
+        bool temp0, temp1, temp2;
+        prs<g.Vdd, g.GND>
+        {	
+		g._sReset  &  in    -> temp0-
+		~g._pReset | ~in    -> temp0+
+		temp0  -> temp1-
+		~temp0 -> temp1+
+		temp1  -> temp2-
+		~temp1 -> temp2+
+		temp2  -> out-
+		~temp2  -> out+
+          
+        }
+}
+

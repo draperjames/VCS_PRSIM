@@ -1,0 +1,154 @@
+import "encoding.act";
+import "logic.act";
+
+export template <pint M, N, pn, width>
+defproc fn_flip(globals g; rail_1ofN<N> a[M], b[M])
+{
+	(;i:M: (;j:N: prs <g.Vdd, g.GND> {
+				a[i].d[j]<width> -> b[i].d[j]-
+				~a[i].d[j]<pn*width> -> b[i].d[j]+
+	} ) )
+}
+
+export template <pint M, N, pn, width>
+defproc fn_not(globals g; rail_1ofN<N> a[M], b[M])
+{
+	(;i:M: (;j:N:
+		b[i].d[j] = a[i].d[N-j-1];
+	) )
+}
+
+export template <pint M, N, index; pbool invert; pint pn, iwidth, owidth>
+defproc fn_one_is(globals g; rail_1ofN<N> a[M], b)
+{
+	orN<M, invert, pn, iwidth, owidth> p;
+	andN<M, invert, pn, iwidth, owidth> np[N-1];
+
+	(;i:N:
+		[ i < index ->
+			np[i].g = g;
+			b.d[i] = np[i].b;
+			(;j:M: np[i].a[j] = a[j].d[i]; )
+		[] i = index ->
+			p.g = g;
+			b.d[i] = p.b;
+			(;j:M: p.a[j] = a[j].d[i]; )
+		[] i > index ->
+			np[i-1].g = g;
+			b.d[i-1] = np[i-1].b;
+			(;j:M: np[i-1].a[j] = a[j].d[i-1]; )
+		]
+	)
+}
+
+export template <pint M, N; pbool invert, reset; pint pn, iwidth, owidth>
+defproc fn_valid(globals g; rail_1ofN<N> word[M]; bool valid)
+{
+	pint coeff[N+M];
+	pint Ns[N+M];
+
+	Ns[0] = N*M;
+	coeff[0] = 1;
+	(;i:N+M-1:
+		[ Ns[i] > 1 ->
+			Ns[i+1] = Ns[i]/2;
+			coeff[i+1] = coeff[i] * 2;
+		[] Ns[i] <= 1 ->
+			Ns[i+1] = Ns[i];
+			coeff[i+1] = coeff[i];
+		]
+	)
+
+	orN<N, false, pn, iwidth, iwidth + (owidth - iwidth)/coeff[N+M-1]> word_valid_or[M];
+	bool word_valid[M];
+	
+	(;i:M: word_valid_or[i](g, word[i].d, word_valid[i]); )
+	cN_reset<M, invert, reset, pn, iwidth + (owidth - iwidth)/coeff[N+M-1], owidth> valid_and(g, word_valid, valid);
+}
+
+export template <pint M, N; pbool invert, reset; pint pn, iwidth, owidth>
+defproc fn_flip_valid(globals g; rail_1ofN<N> word[M]; bool valid)
+{
+	pint coeff[N+M];
+	pint Ns[N+M];
+
+	Ns[0] = N*M;
+	coeff[0] = 1;
+	(;i:N+M-1:
+		[ Ns[i] > 1 ->
+			Ns[i+1] = Ns[i]/2;
+			coeff[i+1] = coeff[i] * 2;
+		[] Ns[i] <= 1 ->
+			Ns[i+1] = Ns[i];
+			coeff[i+1] = coeff[i];
+		]
+	)
+
+	andN<N, true, pn, iwidth, iwidth + (owidth - iwidth)/coeff[N+M-1]> word_valid_or[M];
+	bool word_valid[M];
+	
+	(;i:M:
+		word_valid_or[i](g, word[i].d, word_valid[i]);
+	)
+
+	cN_reset<M,invert,reset, pn, iwidth + (owidth - iwidth)/coeff[N+M-1], owidth> valid_and(g, word_valid, valid);
+}
+
+
+
+export template <pint M, N; pbool invert; pint pn, iwidth, owidth>
+defproc rail_1ofN_valid(globals g; rail_1ofN<N> word[M]; bool v[M])
+{
+	orN<N, invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].d, v[i]); )
+}
+
+export template <pint M; pbool invert; pint pn, iwidth, owidth>
+defproc dualrail_valid(globals g; dualrail word[M]; bool v[M])
+{
+	orN<2, invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].base.d, v[i]); )
+}
+
+export template <pint M; pbool invert; pint pn, iwidth, owidth>
+defproc trirail_valid(globals g; trirail word[M]; bool v[M])
+{
+	orN<3, invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].base.d, v[i]); )
+}
+
+export template <pint M; pbool invert; pint pn, iwidth, owidth>
+defproc quadrail_valid(globals g; quadrail word[M]; bool v[M])
+{
+	orN<4, invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].base.d, v[i]); )
+}
+
+export template <pint M, N; pbool invert; pint pn, iwidth, owidth>
+defproc flip_rail_1ofN_valid(globals g; rail_1ofN<N> word[M]; bool v[M])
+{
+	andN<N, ~invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].d, v[i]); )
+}
+
+export template <pint M; pbool invert; pint pn, iwidth, owidth>
+defproc flip_dualrail_valid(globals g; dualrail word[M]; bool v[M])
+{
+	andN<2, ~invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].base.d, v[i]); )
+}
+
+export template <pint M; pbool invert; pint pn, iwidth, owidth>
+defproc flip_trirail_valid(globals g; trirail word[M]; bool v[M])
+{
+	andN<3, ~invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].base.d, v[i]); )
+}
+
+export template <pint M; pbool invert; pint pn, iwidth, owidth>
+defproc flip_quadrail_valid(globals g; quadrail word[M]; bool v[M])
+{
+	andN<4, ~invert, pn, iwidth, owidth> rail_valid[M];
+	(;i:M: rail_valid[i](g, word[i].base.d, v[i]); )
+}
+

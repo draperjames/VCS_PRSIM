@@ -1,0 +1,19 @@
+import "clock.act";
+import "clockenv.act";
+import "delay.act";
+import "connect.act";
+
+globals g;
+a1of1 L1,R1;
+a1of1 L2,R2;
+a1of1 Ld;
+bool R1v, R2v;
+
+source s(g,L1);
+clock_a1of2 lr1(g,L1,R1);
+delay del1(g,R1.b,L2.b);
+connect c1(g,L2.a,R1.a);
+clock_a1of2 lr2(g,L2,R2);
+delay del2(g,R2.b,Ld.b);
+connect c2(g,Ld.a,R2.a);
+drain d(Ld);

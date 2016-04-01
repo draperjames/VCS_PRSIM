@@ -1,0 +1,167 @@
+import "globals.act";
+import "channel.act";
+import "logic.act";
+
+/*
+If N = M, then this akes a 1of<N> as an input and produces an 
+_1of<N> as output. while 1of<N> has neutral state (00...0), 
+_1of<N> has neutral state (11...1). Furthermore, a state is 
+valid for an _1of<N> when exactly one node is 0. All states 
+other than valid and neutral states are illegal.
+
+if N != M, then this either truncates or drives the output to Vdd.
+*/
+export template <pint N, M>
+defproc invert(globals g; rail_1ofN<N> L; rail_1ofN<M> _R)
+{
+	(;i:N:
+		[ i < M -> 
+			prs <g.Vdd, g.GND> { L.d[i] => _R.d[i]- }
+		]
+	)
+
+	[ M > N ->
+		(;i:M-N:
+			prs <g.Vdd, g.GND> { ~g.GND -> _R.d[i+N]+ }
+		)
+	]
+}
+
+/*
+Takes a 1of<N> and 1of<M> and merges them into a single _1of<N*M>
+by ANDing all combinations of wires.
+
+If NM < N*M, then the result is truncated. If NM > N*M, then the
+output is driven to Vdd. 
+*/
+export template <pint N, M, NM>
+defproc pjoin(globals g; rail_1ofN<N> L0; rail_1ofN<M> L1; rail_1ofN<NM> _R)
+{
+	(;j:M:
+		(;i:N:
+			[ (j*N + i) < NM ->
+				prs <g.Vdd, g.GND> { L0.d[i] & L1.d[j] => _R.d[j*N + i]- }
+			]
+		)
+	)
+
+	[ (N*M) < NM ->
+		(;i:NM-M*N:
+			prs <g.Vdd, g.GND> { ~g.GND -> _R.d[i+M*N]+ }
+		)
+	]
+}
+
+/*
+Takes an _1of<N> and an _1of<M> and joins them into a single 1of<N*M>
+by ORing all of the combinations of wires.
+
+If NM < N*M, then the result is truncated. If NM > N*M, then the
+output is driven to GND. 
+*/
+export template <pint N, M, NM>
+defproc njoin(globals g; rail_1ofN<N> _L0; rail_1ofN<M> _L1; rail_1ofN<NM> R)
+{
+	(;j:M:
+		(;i:N:
+			[ (j*N + i) < NM ->
+				prs <g.Vdd, g.GND> { _L0.d[i] | _L1.d[j] => R.d[j*N + i]- }
+			]
+		)
+	)
+
+	[ (N*M) < NM ->
+		(;i:NM-M*N:
+			prs <g.Vdd, g.GND> { g.Vdd -> R.d[i+M*N]- }
+		)
+	]
+}
+
+/*
+Opposite of join. Takes a 1of<N*M> and breaks it into an _1of<N>
+and an _1of<M>.
+*/
+export template <pint N, M>
+defproc pbreak(globals g; rail_1ofN<N*M> L; rail_1ofN<N> _R0; rail_1ofN<M> _R1)
+{
+	bool internal0[N][M];
+	orN<M, true> a0[N];
+	(;i:N:
+		(;j:M: internal0[i][j] = L.d[j*M + i]; )
+		a0[i](g, internal0[i], _R0.d[i]);
+	)
+
+	bool internal1[M][N];
+	orN<N, true> a1[M];
+	(;j:M:
+		(;i:N: internal1[j][i] = L.d[j*M + i]; )
+		a1[j](g, internal1[j], _R1.d[j]);
+	)
+}
+
+/*
+Opposite of join. Takes an _1of<N*M> and breaks it into a 1of<N>
+and a 1of<M>.
+*/
+export template <pint N, M>
+defproc nbreak(globals g; rail_1ofN<N*M> _L; rail_1ofN<N> R0; rail_1ofN<M> R1)
+{
+	bool _internal0[N][M];
+	andN<M, true> a0[N];
+	(;i:N:
+		(;j:M: _internal0[i][j] = _L.d[j*M + i]; )
+		a0[i](g, _internal0[i], R0.d[i]);
+	)
+
+	bool _internal1[M][N];
+	andN<N, true> a1[M];
+	(;j:M:
+		(;i:N: _internal1[j][i] = _L.d[j*M + i]; )
+		a1[j](g, _internal1[j], R1.d[j]);
+	)
+}
+
+/*
+Decodes two 1of<4> into one 1of<16>
+*/
+export template <pint NM>
+defproc pdecoder2x1of4(globals g; rail_1ofN<4> L[2]; rail_1ofN<NM> R)
+{
+	rail_1ofN<NM> _internal;
+	pjoin<4, 4, NM> j0(g, L[0], L[1], _internal);
+	invert<NM, NM> i0(g, _internal, R);
+}
+
+/*
+Decodes three 1of<4> into one 1of<64>
+*/
+export template <pint NM>
+defproc pdecoder3x1of4(globals g; rail_1ofN<4> L[3]; rail_1ofN<NM> R)
+{
+	pint x = 16;
+	[ NM < 16 -> x = NM; ]
+	pint y = (NM+15)/16;
+
+	rail_1ofN<x> _internal_0;
+	rail_1ofN<y> _internal_1;
+	pjoin<4, 4, x> j0(g, L[0], L[1], _internal_0);
+	invert<4, y> j1(g, L[2], _internal_1);
+	njoin<x, y, NM> j2(g, _internal_0, _internal_1, R);
+}
+
+/*
+Decodes four 1of<4> and one 1of<256>
+*/
+export template <pint NM>
+defproc pdecoder4x1of4(globals g; rail_1ofN<4> L[4]; rail_1ofN<NM> R)
+{
+	pint x = 16;
+	[ NM < 16 -> x = NM; ]
+	pint y = (NM+15)/16;
+
+	rail_1ofN<x> _internal_0;
+	rail_1ofN<y> _internal_1;
+	pjoin<4, 4, x> j0(g, L[0], L[1], _internal_0);
+	pjoin<4, 4, y> j1(g, L[2], L[3], _internal_1);
+	njoin<x, y, NM> j2(g, _internal_0, _internal_1, R);
+}

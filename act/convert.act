@@ -1,0 +1,73 @@
+import "encoding.act";
+import "logic.act";
+
+export template <pint N, M>
+defproc invert(rail_1ofN<N> L; rail_1ofN<M> _R)
+{
+	(;i:N:
+		[ i < M -> 
+			prs { L.d[i] => _R.d[i]- }
+		]
+	)
+}
+
+export template <pint N, M, NM>
+defproc pjoin(rail_1ofN<N> L0; rail_1ofN<M> L1; rail_1ofN<NM> _R)
+{
+	(;j:M:
+		(;i:N:
+			[ (j*N + i) < NM ->
+				prs { L0.d[i] & L1.d[j] => _R.d[j*N + i]- }
+			]
+		)
+	)
+}
+
+export template <pint N, M, NM>
+defproc njoin(rail_1ofN<N> _L0; rail_1ofN<M> _L1; rail_1ofN<NM> R)
+{
+	(;j:M:
+		(;i:N:
+			[ (j*N + i) < NM ->
+				prs { _L0.d[i] | _L1.d[j] => R.d[j*N + i]- }
+			]
+		)
+	)
+}
+
+export template <pint N, M>
+defproc pbreak(rail_1ofN<N*M> L; rail_1ofN<N> _R0; rail_1ofN<M> _R1)
+{
+	(;i:N:
+		prs
+		{
+			(|:j:M: L.d[j*M + i] ) => _R0.d[i]-
+		}
+	)
+
+	(;j:M:
+		prs
+		{
+			(|:i:N: L.d[j*M + i] ) => _R1.d[j]-
+		}
+	)
+}
+
+export template <pint N, M>
+defproc nbreak(rail_1ofN<N*M> _L; rail_1ofN<N> R0; rail_1ofN<M> R1)
+{
+	bool _internal0[N][M];
+	andN<M, true> a0[N];
+	(;i:N:
+		(;j:M: _internal0[i][j] = _L.d[j*M + i]; )
+		a0[i](_internal0[i], R0.d);
+	)
+
+	bool _internal1[M][N];
+	andN<N, true> a1[M];
+	(;j:M:
+		(;i:N: _internal1[j][i] = _L.d[j*M + i]; )
+		a1[j](_internal1[j][i], R1.d);
+	)
+}
+

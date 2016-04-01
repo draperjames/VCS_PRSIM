@@ -1,0 +1,3 @@
+source /usr/local/cad/synopsys/synopsys_2015_64.cshrc
+rm -rf simv csrc simv.daidir
+vcs -full64 +vpi +cli+3 -use_vpiobj vpi.o inv.v

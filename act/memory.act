@@ -1,0 +1,315 @@
+import "globals.act";
+import "encoding.act";
+import "channel.act";
+import "function.act";
+import "environment.act";
+
+/*
+
+Instantaneous 6T SRAM cell.
+
+_bl is an inverted dualrail representing the bit lines of
+the cell. It should be precharged to the neutral state (11)
+before a read and driven to a valid value (01 or 10) for a 
+write.
+
+wl is the word line for the cell. For a read or write operation
+the wl must be 1. Otherwise no action will be taken.
+
+   bl.f        bl.t
+wl__|___________|__
+    |  ___|___  |
+    | |       | |
+    |_|6T SRAM|_|
+    | |_______| |
+    |           |
+
+
+The [after=0] attribute means that the production rule fires
+immediately (no delay) after it is enabled, effectively
+making the production rule an atomic action. This is necessary
+in order to implement the timing assumption for the completion
+of a memory write.
+
+The [weak=1] attribute means that the production rule is driven
+by smaller transistors and will be easily overtaken by transistors
+of normal size. This is necessary to prevent X values caused by
+interference during the write operation.
+
+Prsim does not directly support pass transistors so they have to
+be represented as a set of 4 production rules for prsim. However,
+these production rules do not have to be bubble reshuffled or sized.
+
+*/
+export defproc sram_cell(globals g; bool wl; dualrail _bl)
+{
+	dualrail _q;
+
+	//Cross coupled inverters
+	prs<g.Vdd, g.GND>
+	{
+		// Assume that the value on the sram settles before the next action
+		[weak=1; after=0]  _q.f<4,5>     -> _q.t-
+		[weak=1; after=0] ~_q.f<4.75, 5> -> _q.t+
+
+		[weak=1; after=0]  _q.t<4,5>     -> _q.f-
+		[weak=1; after=0] ~_q.t<4.75, 5> -> _q.f+
+	}
+
+	// Access Transistors
+	[ LAYOUT ->
+		prs<g.Vdd, g.GND>
+		{
+			passn<3,5> (wl, _q.t, _bl.t)
+			passn<3,5> (wl, _q.f, _bl.f)
+		}
+	[] ~LAYOUT ->
+		prs<g.Vdd, g.GND>
+		{
+			// Assume that the bitlines have changed in the time after wl+,pchg- and before sen+
+			[weak=1; after=0]  wl & ~_q.f  -> _bl.f-
+			[weak=1; after=0]  wl & ~_q.t  -> _bl.t-
+
+			// Assume that the value on the bit lines has been written during the time alotted for a write
+			[after=0] wl & ~_bl.f -> _q.f-
+			[after=0] wl & ~_bl.t -> _q.t-
+		}
+	]
+}
+
+/*
+
+Sense Amplifier
+
+If enable is set to 0, then out is pulled to the neutral
+state (11) no matter the value of _bl. If enable is set
+to 1, then the first rail of _bl to lower will cause
+the corresponding rail of out to lower.
+
+*/
+export defproc sense_amplifier(globals g; dualrail _bl, out; bool enable)
+{
+	prs<g.Vdd,g.GND>
+	{
+		enable -> @disable-
+		
+		[weak=1] ~out.f -> out.t+
+		[weak=1] ~out.t -> out.f+
+		~enable -> out.t+
+		~enable -> out.f+
+		~@disable & _bl.f -> out.f-
+		~@disable & _bl.t -> out.t-
+	}
+}
+
+
+export template<pint length; pbool invert>
+defproc delay_line(globals g; bool in, out)
+{
+    pint length_ = length+1;
+    bool internal[2*length_+1];
+	internal[0] = in;
+	(;i:length_:
+		prs<g.Vdd, g.GND>
+		{
+			 internal[i*2]   -> internal[i*2+1]-
+			~internal[i*2]   -> internal[i*2+1]+
+			 internal[i*2+1] -> internal[(i+1)*2]-
+			~internal[i*2+1] -> internal[(i+1)*2]+
+		}
+	)
+
+	[ ~invert ->
+		internal[2*(length_)] = out;
+	[] invert ->
+		prs <g.Vdd, g.GND>
+		{
+			internal[2*(length_)] -> out-
+			~internal[2*(length_)] -> out+
+		}
+	]
+}
+
+/*
+pchg-,read.f-,read.t-,write.e+,sen-;
+*[
+  [  read.e -> pchg-, [[t : word_line] & [t : sense_amp]]; sen+; [~_bl.f -> read.f+ [] ~_bl.t -> read.t+]; [~read.e]; sen-; pchg+, [~[t : sense_amp] & ~[t : word_line]]; read.f-,read.t-
+  [] write.f -> _bl.f-; [[t : bit_line] & [t : word_line]]; write.e-; [~write.f & ~write.t ~[t : bit_line] & ~[t : word_line]]; write.e+
+  [] write.t -> _bl.t-; [[t : bit_line] & [t : word_line]]; write.e-; [~write.f & ~write.t ~[t : bit_line] & ~[t : word_line]]; write.e+
+  ]
+ ]
+
+*/
+export template<pint t_sense_amp_length, t_bit_line_length, S>
+defproc bl_interface(globals g; dualrail _bl; e1of2 read, write; bool t_word_line)
+{
+	bool _pchg;
+	bool  pchg;
+	
+	dualrail _write;
+	bool write_done;
+
+	bool _read_e;
+	bool read_done;
+
+	bool sen;
+	dualrail srd;
+
+	sense_amplifier sense(g, _bl, srd, sen);
+
+	delay_line<t_sense_amp_length, false> t_sense_amp;
+	delay_line<t_bit_line_length, false> t_bit_line;
+
+	t_sense_amp.g = g;
+	t_bit_line.g = g;
+	t_sense_amp.in = _pchg;
+	t_bit_line.in = write_done;
+
+	prs <g.Vdd, g.GND>
+	{
+		// READ
+		 read.e<S> -> _read_e-
+		~read.e<S> -> _read_e+
+
+		~srd.f<S> -> read.t+
+		~srd.t<S> -> read.f+
+		g.pReset<2> | srd.f<2*S> & read_done<2*S> -> read.t-
+		g.pReset<2> | srd.t<2*S> & read_done<2*S> -> read.f-
+
+		~g._pReset<2>   | ~t_word_line<2*S> & ~t_sense_amp.out<2*S> -> read_done+
+		 g._sReset<4*S> &  t_word_line<2*S> &  t_sense_amp.out<2*S> -> read_done-
+
+		// Precharge
+		~g._pReset<2>   | ~sen<2*S> & ~read.e<2*S> -> pchg+
+		 g._sReset<2*S> &              read.e<S> -> pchg-
+		 pchg<S> -> _pchg-
+		~pchg<S> -> _pchg+
+
+		// Assume that the precharge after a read happens before the next action
+		[after=0] ~g.sReset<4*S> & ~_pchg<2*S> & ~write.f<2*S> -> _bl.f+
+		[after=0] ~g._pReset<2>  | ~_pchg<2*S> & ~write.t<2*S> -> _bl.t+
+
+		// Control for the sense amplifier
+		                   _read_e<S> -> sen-
+		~read_done<2*S> & ~_read_e<2*S> -> sen+
+
+		// WRITE
+		 write.f<S> -> _write.f-
+		~write.f<S> -> _write.f+
+		 write.t<S> -> _write.t-
+		~write.t<S> -> _write.t+
+
+		~g.sReset<4*S> & (~_write.f<2*S> & ~_bl.f<2*S> | ~_write.t<2*S> & ~_bl.t<2*S>) -> write_done+
+		 g.pReset<2>   |   _write.f<4*S> &  _bl.f<4*S> &  _write.t<4*S> &  _bl.t<4*S>  -> write_done-
+
+		g.pReset<2>    | _bl.t<2*S> & write.f<2*S> -> _bl.f-
+		g._sReset<4*S> & _bl.f<2*S> & write.t<2*S> -> _bl.t-
+		
+		// Write Acknowledge
+		 g.pReset<2>   |  t_bit_line.out<2*S> &  t_word_line<2*S> -> write.e-
+		~g.sReset<4*S> & ~t_bit_line.out<2*S> & ~t_word_line<2*S> -> write.e+
+	}
+}
+
+/*
+
+SRAM Memory Bank
+
+The read[] channels are passive channels. Raising read[].e
+will enable the sense amplifiers for the selected word allowing
+read[].b to become valid (depending upon the value on the bit 
+lines _bl[][]). Then lowering read[].e will disable the sense
+amplifiers and precharge the bit lines again.
+
+The write[] channels are active channels. Set a valid data
+on write[].b and when the write is complete, write[].e will lower.
+Subsequently making write[].b neutral will cause write[].e to raise.
+
+Operations must be mutually exclusive. Executing multiple operations
+at the same time has undefined behavior.
+
+For any operation to take place, a wl[] must be set to 1. This will
+choose the row you want to operate on.
+
+pchg off; bl+; wl+; wl-; bl-; pchg on
+pchg off; wl+; [[t : bl]]; sen+; sen-; wl-; pchg on
+
+bitline is valid once the end of the wire is valid
+wl is valid once the end of the wire is valid
+
+
+[read[i].e] 
+
+
+
+*/
+export template <pint rows, words_per_row, word_size, t_sense_amp_length, t_bit_line_length, t_word_line_length, S>
+defproc sram_bankNxM(globals g; eMx1of2<word_size> read[words_per_row], write[words_per_row]; e1of<rows> select)
+{
+	sram_cell						bits[rows][words_per_row][word_size];
+	bl_interface<t_sense_amp_length, t_bit_line_length, S>	iface[words_per_row][word_size];
+
+	delay_line<t_word_line_length, false> t_word_line;
+
+	logic::cN_reset<word_size, false,false>	write_valid[words_per_row];
+
+	logic::orN<rows, false>					get_wl_valid;
+	bool							_wl[rows];
+	bool							wl[rows];
+
+	logic::fn_valid<word_size, 2, false,false> write_request[words_per_row];
+
+	dualrail						_bl[words_per_row][word_size];
+
+	logic::orN<words_per_row*2, true>			get_select_enable;
+
+	(;i:rows:
+		prs <g.Vdd, g.GND>
+		{
+			select.d[i]<S> -> _wl[i]-
+			~select.d[i]<S> -> _wl[i]+
+			g._sReset<2*S> & _wl[i]<S> -> wl[i]-
+			~g._pReset<2>  | ~_wl[i]<S> -> wl[i]+
+		}
+	)
+
+	(;j:words_per_row:
+		(;k:word_size:
+			(;i:rows:
+				bits[i][j][k].g = g;
+				bits[i][j][k].wl = wl[i];
+				bits[i][j][k]._bl = _bl[j][k];
+			)
+			iface[j][k].g = g;
+			iface[j][k]._bl = _bl[j][k];
+			iface[j][k].t_word_line = t_word_line.out;
+
+			iface[j][k].read.f = read[j].b[k].d[0];
+			iface[j][k].read.t = read[j].b[k].d[1];
+			iface[j][k].read.e = read[j].e;
+			iface[j][k].write.f = write[j].b[k].d[0];	
+			iface[j][k].write.t = write[j].b[k].d[1];	
+			write_valid[j].a[k] = iface[j][k].write.e;
+		)
+
+		write_request[j].g = g;
+		(;k:word_size:
+			write_request[j].word[k] = write[j].b[k].d;
+		)
+
+		write_valid[j].g = g;
+		write[j].e = write_valid[j].b;
+		get_select_enable.a[j] = write_request[j].valid;
+		get_select_enable.a[words_per_row+j] = read[j].e;
+	)
+
+	get_wl_valid.g = g;
+	get_wl_valid.a = wl;
+
+	t_word_line.g = g;
+	t_word_line.in = get_wl_valid.b;
+
+	get_select_enable.g = g;
+	get_select_enable.b = select.e;
+}
+

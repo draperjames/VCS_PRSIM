@@ -1,0 +1,24 @@
+import "globals.act";
+import "encoding.act";
+import "channel.act";
+import "environment.act";
+
+export defproc clock_a1of2( globals g; a1of1 L,R )
+{
+        bool nLo;
+	bool e;
+        prs<g.Vdd, g.GND>
+        {
+		
+		g._sReset & e & L.b     -> nLo-
+		g._sReset & ~nLo & ~R.a -> R.b+		
+		~g._pReset | ~e & ~L.b   -> nLo+
+		~g._pReset | nLo & R.a   -> R.b-
+		
+		R.b   -> e-
+		~R.b  -> e+
+                ~nLo  -> L.a+
+                nLo   -> L.a-
+        }
+}
+

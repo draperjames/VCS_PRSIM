@@ -1,0 +1,374 @@
+import "globals.act";
+
+export template<pint pn, width>
+defproc not(globals g; bool a, _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a<pn*width> -> _b+
+		 a<width>    -> _b-
+	}
+}
+
+export template<pint pn, width>
+defproc nand2(globals g; bool a[2], _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a[0]<pn*width> | ~a[1]<pn*width> -> _b+ 
+		 a[0]<2*width>  &  a[1]<2*width>  -> _b- 
+	}
+}
+
+export template <pint pn, width>
+defproc nand3(globals g; bool a[3], _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a[0]<pn*width> | ~a[1]<pn*width> | ~a[2]<pn*width> -> _b+
+		 a[0]<3*width> &  a[1]<3*width> &  a[2]<3*width> -> _b-
+	}
+}
+
+export template <pint pn, width>
+defproc nand4(globals g; bool a[4], _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a[0]<pn*width> | ~a[1]<pn*width> | ~a[2]<pn*width> | ~a[3]<pn*width> -> _b+
+		 a[0]<4*width> &  a[1]<4*width> &  a[2]<4*width> &  a[3]<4*width> -> _b-
+	}
+}
+
+export template <pint pn, width>
+defproc nor2(globals g; bool a[2], _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a[0]<2*pn*width> & ~a[1]<2*pn*width> -> _b+
+		 a[0]<width> |  a[1]<width> -> _b-
+	}
+}
+
+export template <pint pn, width>
+defproc nor3(globals g; bool a[3], _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a[0]<3*pn*width> & ~a[1]<3*pn*width> & ~a[2]<3*pn*width> -> _b+
+		 a[0]<width> |  a[1]<width> |  a[2]<width> -> _b-
+	}
+}
+
+export template <pint pn, width>
+defproc nor4(globals g; bool a[4], _b)
+{
+	prs<g.Vdd, g.GND> {
+		~a[0]<4*pn*width> & ~a[1]<4*pn*width> & ~a[2]<4*pn*width> & ~a[3]<4*pn*width> -> _b+
+		 a[0]<width> |  a[1]<width> |  a[2]<width> | a[3]<width> -> _b-
+	}
+}
+
+// assumes inputs are same at reset
+export template <pint pn, width>
+defproc c2(globals g; bool a[2], _b)
+{
+	prs<g.Vdd, g.GND>
+	{
+		~a[0]<2*pn*width> & ~a[1]<2*pn*width> -> _b+
+		 a[0]<2*width> &  a[1]<2*width> -> _b-
+	}
+}
+
+export template<pbool reset; pint pn, width>
+defproc c2_reset(globals g; bool a[2], _b)
+{
+	[ ~reset ->
+		prs<g.Vdd, g.GND> {
+			~g.sReset<3*pn*width> & ~a[0]<3*pn*width> & ~a[1]<3*pn*width> -> _b+
+			g.pReset<4> | (a[0]<2*width> &  a[1]<2*width>) -> _b-
+		}
+	[] reset ->
+		prs<g.Vdd, g.GND> {
+			~g._pReset<4*pn> | (~a[0]<2*pn*width> & ~a[1]<2*pn*width>) -> _b+
+			g._sReset<3*width> & a[0]<3*width> &  a[1]<3*width> -> _b-
+		}
+	]
+}
+
+// assumes inputs are same at reset
+export template <pint pn, width>
+defproc c3(globals g; bool a[3], _b)
+{
+	prs<g.Vdd, g.GND>
+	{
+		~a[0]<3*pn*width> & ~a[1]<3*pn*width> & ~a[2]<3*pn*width> -> _b+
+		 a[0]<3*width> &  a[1]<3*width> &  a[2]<3*width> -> _b-
+	}
+}
+
+export template<pbool reset; pint pn, width>
+defproc c3_reset(globals g; bool a[3], _b)
+{
+	[ ~reset ->
+		prs<g.Vdd, g.GND> {
+			g.pReset<4> | (a[0]<3*width> &  a[1]<3*width> &  a[2]<3*width>) -> _b-
+			~g.sReset<4*pn*width> & ~a[0]<4*pn*width> & ~a[1]<4*pn*width> & ~a[2]<4*pn*width> -> _b+
+		}
+	[] reset -> prs<g.Vdd, g.GND> {
+			g._sReset<4*width> & (a[0]<4*width> &  a[1]<4*width> &  a[2]<4*width>) -> _b-
+			~g._pReset<4*pn> | (~a[0]<3*pn*width> & ~a[1]<3*pn*width> & ~a[2]<3*pn*width>) -> _b+
+		}
+	]
+}
+
+export template<pint N; pbool invert; pint pn, iwidth, owidth>
+defproc andN(globals g; bool a[N], b);
+export template<pint N; pbool invert; pint pn, iwidth, owidth>
+defproc orN(globals g; bool a[N], b);
+
+export template<pint N; pbool invert; pint pn, iwidth, owidth>
+defproc andN(globals g; bool a[N], b)
+{
+	[  N = 1 ->
+		[  ~invert ->
+			//b = a[0];
+			// This is a hack to fix the following netgen failure 
+			// that occurs when a process has no logic
+			// Assertion failed, file netgen.c, line 491
+			// Assertion: id->next == NULL
+			// ERR: what?
+			bool _a0;
+			not<pn, iwidth> inv1a(g, a[0], _a0);
+			not<pn, owidth> inv1b(g, _a0, b);
+		[] invert ->
+			not<pn, owidth> n(g, a[0], b);
+		]
+	[] N != 1 ->
+		bool internal[N/2];
+		[  N = 2 -> nand2<pn, iwidth> c2a(g, a, internal[0]);
+		[] N = 3 -> nand3<pn, iwidth> c3a(g, a, internal[0]);
+		[] N > 3 ->
+			[  (N%2) = 0 ->
+				nand2<pn, iwidth> c2b[N/2];
+				(;i:(N/2):  c2b[i](g, {a[2*i], a[2*i+1]}, internal[i]); )
+			[] (N%2) = 1 ->
+				nand2<pn, iwidth> c2c[(N-3)/2];
+				(;i:((N-3)/2):  c2c[i](g, {a[2*i], a[2*i+1]}, internal[i]); )
+				nand3<pn, iwidth> c3b(g, {a[N-3], a[N-2], a[N-1]}, internal[N/2-1]);
+			]
+		]
+		
+		// width of layer i out of L: iwidth + (owidth - iwidth)*2^(i-L)
+		pint coeff[N];
+		pint Ns[N];
+
+		coeff[0] = 1;
+		Ns[0] = N;
+		(;i:N-1:
+			[ Ns[i] > 1 ->
+				coeff[i+1] = coeff[i] * 2;
+				Ns[i+1] = Ns[i]/2;
+			[] Ns[i] <= 1 ->
+				coeff[i+1] = coeff[i];
+				Ns[i+1] = Ns[i];
+			]
+		)
+
+		orN<N/2, ~invert, pn, iwidth + (owidth - iwidth)/coeff[N-1], owidth> or(g, internal, b);
+	]
+}
+
+export template<pint N; pbool invert; pint pn, iwidth, owidth>
+defproc orN(globals g; bool a[N], b)
+{
+	[  N = 1 ->
+		[  ~invert ->
+			//b = a[0];
+			// This is a hack to fix the following netgen failure 
+			// that occurs when a process has no logic
+			// Assertion failed, file netgen.c, line 491
+			// Assertion: id->next == NULL
+			// ERR: what?
+			bool _a0;
+			not<pn, iwidth> inv1a(g, a[0], _a0);
+			not<pn, owidth> inv1b(g, _a0, b);
+		[] invert ->
+			not<pn, owidth> n(g, a[0], b);
+		]
+	[] N != 1 ->
+		bool internal[N/2];
+		[  N = 2 -> nor2<pn, iwidth> c2a(g, a, internal[0]);
+		[] N = 3 -> nor3<pn, iwidth> c3a(g, a, internal[0]);
+		[] N > 3 ->
+			[  (N%2) = 0 ->
+				nor2<pn, iwidth> c2b[N/2];
+				(;i:(N/2):  c2b[i](g, {a[2*i], a[2*i+1]}, internal[i]); )
+			[] (N%2) = 1 ->
+				nor2<pn, iwidth> c2c[(N-3)/2];
+				(;i:((N-3)/2):  c2c[i](g, {a[2*i], a[2*i+1]}, internal[i]); )
+				nor3<pn, iwidth> c3b(g, {a[N-3], a[N-2], a[N-1]}, internal[N/2-1]);
+			]
+		]
+		
+		// width of layer i out of L: iwidth + (owidth - iwidth)*2^(i-L)
+		pint coeff[N];
+		pint Ns[N];
+
+		coeff[0] = 1;
+		Ns[0] = N;
+		(;i:N-1:
+			[ Ns[i] > 1 ->
+				coeff[i+1] = coeff[i] * 2;
+				Ns[i+1] = Ns[i]/2;
+			[] Ns[i] <= 1 ->
+				coeff[i+1] = coeff[i];
+				Ns[i+1] = Ns[i];
+			]
+		)
+
+		andN<N/2, ~invert, pn, iwidth + (owidth - iwidth)/coeff[N-1], owidth> c(g, internal, b);
+	]
+}
+
+/*
+This is a c-element tree with no reset circuitry. Its a recursive structure,
+so each recursion, it takes the number of inputs and divides it in half. If the
+number is odd, then one side will get one more input. The following is an example 
+execution for a 10 input c-element. This structure will have at most one inverter.
+Furthermore, 3-input c-elements will only show up in the first column of c-elements.
+All the rest will be 2-input. This guarantees that the difference in delay on each
+side will be as little as possible. This also guarantees that the total delay will
+be as little as possible because there will never be a chain of 3-input c-elements.
+
+0 1 2   3
+_
+ \
+  C
+_/ \
+_   C
+ \ / \
+--C   \
+_/     \
+_       C
+ \     /
+  C   /
+_/ \ /
+_   C
+ \ /
+--C
+_/
+
+invert determines whether the output is inverted with respect
+to the input. For example, if N is 2 and invert is false, you
+will get a single 2-input c-element followed by an inverter.
+
+*/
+export template<pint N; pbool invert; pint pn, iwidth, owidth>
+defproc cN(globals g; bool a[N], b)
+{
+	bool _b;
+	[  N = 1 ->
+		_b = a[0];
+		[  invert -> not<pn, (iwidth + owidth)/2> inv1(g, _b, b);
+		[]~invert -> //b = _b;
+			// This is a hack to fix the following netgen failure 
+			// that occurs when a process has no logic
+			// Assertion failed, file netgen.c, line 491
+			// Assertion: id->next == NULL
+			// ERR: what?
+			bool __b;
+			not<pn, iwidth> inv1a(g, _b, __b);
+			not<pn, owidth> inv1b(g, __b, b);
+		]
+	[] N = 2 ->
+		c2<pn, iwidth> center2(g, a, _b);
+		[  invert -> b = _b;
+		[]~invert -> not<pn, owidth> inv2(g, _b, b);
+		]
+	[] N = 3 ->
+		c3<pn, iwidth> center3(g, a, _b);
+		[  invert -> b = _b;
+		[]~invert -> not<pn, owidth> inv3(g, _b, b);
+		]
+	[] N > 3 ->
+		// sense = (log2(N)+invert)%2
+		pbool sense[33];
+		sense[0] = invert;
+		pint loopvar[33];
+		loopvar[0] = N;
+		(;i:32:
+		  [  loopvar[i] > 1 -> sense[i+1] = ~sense[i]; loopvar[i+1] = loopvar[i]/2;
+		  [] loopvar[i] <= 1 -> sense[i+1] = sense[i]; loopvar[i+1] = loopvar[i];
+		  ]
+		)
+
+		bool v[2];
+		[ ~sense[32] ->
+			cN<N/2, ~invert, pn, iwidth, iwidth + (owidth - iwidth)/2>		lefti(g, a[0..N/2-1], v[0]);
+			cN<N - N/2, ~invert, pn, iwidth, iwidth + (owidth - iwidth)/2>		righti(g, a[N/2..N-1], v[1]);
+			c2<pn, owidth>				centeri(g, v, _b);
+			b = _b;	
+		[] sense[32] ->
+			cN<N/2, invert, pn, iwidth, iwidth + (owidth - iwidth)/4>			left(g, a[0..N/2-1], v[0]);
+			cN<N - N/2, invert, pn, iwidth, iwidth + (owidth - iwidth)/4>		right(g, a[N/2..N-1], v[1]);
+			c2<pn, iwidth + (owidth - iwidth)/2>	center(g, v, _b);
+			not<pn, owidth>				inv(g, _b, b);
+		]
+	]
+}
+
+/*
+Look at cN for documentation. Reset circuitry is placed at every
+c-element.
+
+reset determines the reset value of b. This is not affected
+by invert. 
+*/ 
+export template<pint N; pbool invert, reset; pint pn, iwidth, owidth>
+defproc cN_reset(globals g; bool a[N], b)
+{
+	bool _b;
+	[  N = 1 ->
+		_b = a[0];
+		[   invert -> not<pn, (iwidth + owidth)/2> inv1(g, _b, b);
+		[] ~invert ->
+			//b = _b;
+			// This is a hack to fix the following netgen failure 
+			// that occurs when a process has no logic
+			// Assertion failed, file netgen.c, line 491
+			// Assertion: id->next == NULL
+			// ERR: what?
+			bool __b;
+			not<pn, iwidth> inv1a(g, _b, __b);
+			not<pn, owidth> inv1b(g, __b, b);
+		]
+	[] N = 2 ->
+		[   invert -> c2_reset<reset, pn, iwidth> center2i(g, a, _b); b = _b;
+		[] ~invert -> c2_reset<~reset, pn, iwidth> center2n(g, a, _b); not<pn, owidth> inv2(g, _b, b);
+		]
+	[] N = 3 ->
+		[   invert -> c3_reset<reset, pn, iwidth> center3i(g, a, _b); b = _b;
+		[] ~invert -> c3_reset<~reset, pn, iwidth> center3n(g, a, _b); not<pn, owidth> inv3(g, _b, b);
+		]
+	[] N > 3 ->
+		// sense = (log2(N)+invert)%2
+		pbool sense[33];
+		sense[0] = invert;
+		pint loopvar[33];
+		loopvar[0] = N;
+		(;i:32:
+		  [  loopvar[i] > 1 -> sense[i+1] = ~sense[i]; loopvar[i+1] = loopvar[i]/2;
+		  [] loopvar[i] <= 1 -> sense[i+1] = sense[i]; loopvar[i+1] = loopvar[i];
+		  ]
+		)
+		
+		bool v[2];
+		[ ~sense[32] ->
+			cN_reset<N/2, ~invert, ~reset, pn, iwidth, iwidth + (owidth - iwidth)/2>		lefti(g, a[0..N/2-1], v[0]);
+			cN_reset<N - N/2, ~invert, ~reset, pn, iwidth, iwidth + (owidth - iwidth)/2>	righti(g, a[N/2..N-1], v[1]);
+			c2_reset<reset, pn, owidth>				centeri(g, v, _b);
+			b = _b;	
+		[] sense[32] ->
+			cN_reset<N/2, invert, reset, pn, iwidth, iwidth + (owidth - iwidth)/4>		left(g, a[0..N/2-1], v[0]);
+			cN_reset<N - N/2, invert, reset, pn, iwidth, iwidth + (owidth - iwidth)/4>	right(g, a[N/2..N-1], v[1]);
+			c2_reset<~reset, pn, iwidth + (owidth - iwidth)/2>			center(g, v, _b);
+			not<pn, owidth>					inv(g, _b, b);
+		]
+	]
+}
+

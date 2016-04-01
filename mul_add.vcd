@@ -1,0 +1,371 @@
+$date
+	Fri Apr  1 17:58:38 2016
+$end
+
+$version
+	Synopsys VCS version K-2015.09-SP1-1_Full64
+$end
+
+$timescale
+	1ps
+$end
+
+$comment Csum: 1 ee0eccb34d6d7a96 $end
+
+
+$scope module test $end
+$var reg 1 ! R1b $end
+$var reg 1 " R2b $end
+$var wire 1 # L2b $end
+$var wire 1 $ Ldb $end
+$var reg 1 % trigger $end
+$var reg 1 & nsR $end
+$var reg 1 ' npR $end
+$var reg 1 ( clk1 $end
+$var reg 1 ) clk2 $end
+$var integer 32 * counter $end
+$var reg 1 + reset $end
+$var reg 10 , a [9:0] $end
+$var reg 10 - b [9:0] $end
+$var wire 10 . out [9:0] $end
+
+$scope module dut $end
+$var wire 1 / clk1 $end
+$var wire 1 0 clk2 $end
+$var wire 1 1 reset $end
+$var wire 10 2 a [9:0] $end
+$var wire 10 3 b [9:0] $end
+$var reg 10 4 out [9:0] $end
+$var wire 10 5 a_s1 [9:0] $end
+$var wire 10 6 b_s1 [9:0] $end
+$var reg 10 7 out_s1 [9:0] $end
+$var wire 10 8 in_s2 [9:0] $end
+$var wire 10 9 acc_s2 [9:0] $end
+
+$scope module areg_stage1 $end
+$var wire 1 / clk $end
+$var wire 1 1 reset $end
+$var reg 10 : q [9:0] $end
+$var wire 10 2 d [9:0] $end
+$upscope $end
+
+
+$scope module breg_stage1 $end
+$var wire 1 / clk $end
+$var wire 1 1 reset $end
+$var reg 10 ; q [9:0] $end
+$var wire 10 3 d [9:0] $end
+$upscope $end
+
+
+$scope module accreg_stage2 $end
+$var wire 1 0 clk $end
+$var wire 1 1 reset $end
+$var reg 10 < q [9:0] $end
+$var wire 10 = d [9:0] $end
+$upscope $end
+
+
+$scope module outreg_stage2 $end
+$var wire 1 0 clk $end
+$var wire 1 1 reset $end
+$var reg 10 > q [9:0] $end
+$var wire 10 ? d [9:0] $end
+$upscope $end
+
+$upscope $end
+
+$upscope $end
+
+$enddefinitions $end
+
+#0
+$dumpvars
+z#
+z$
+x!
+x"
+x(
+x)
+x0
+x1
+x'
+0&
+x+
+x%
+bxxxxxxxxxx ,
+bxxxxxxxxxx 5
+bxxxxxxxxxx 9
+bxxxxxxxxxx <
+bxxxxxxxxxx -
+bxxxxxxxxxx 6
+bxxxxxxxxxx ;
+b00000000000000000000000000000000 *
+bxxxxxxxxxx =
+bxxxxxxxxxx 2
+bxxxxxxxxxx 3
+bxxxxxxxxxx 4
+bxxxxxxxxxx 8
+bxxxxxxxxxx .
+bxxxxxxxxxx 7
+bxxxxxxxxxx ?
+bxxxxxxxxxx >
+bxxxxxxxxxx :
+x/
+$end
+#90
+1'
+#180
+0'
+#190
+0%
+#200
+0(
+0/
+0)
+00
+#270
+1'
+#360
+1&
+#370
+1%
+b0000000001 ,
+b0000000001 2
+b0000000010 -
+b0000000010 3
+#390
+1+
+11
+1(
+1/
+b0000000000 :
+b0000000000 5
+b0000000000 ;
+b0000000000 6
+b0000000000 7
+b0000000000 ?
+#400
+0%
+#420
+0(
+0/
+#430
+1%
+#450
+1)
+10
+b0000000000 <
+b0000000000 9
+b0000000000 >
+b0000000000 8
+b0000000000 4
+b0000000000 .
+b0000000000 =
+#490
+0+
+01
+#500
+1(
+1/
+b00000000000000000000000000000001 *
+b0000000001 :
+b0000000001 5
+b0000000010 ;
+b0000000010 6
+b0000000010 7
+b0000000010 ?
+#510
+0%
+#530
+0)
+00
+#580
+0(
+0/
+#590
+1%
+b0000000011 ,
+b0000000011 2
+b0000001010 -
+b0000001010 3
+#610
+1)
+10
+b0000000010 >
+b0000000010 8
+b0000000010 4
+b0000000010 .
+b0000000010 =
+#660
+1(
+1/
+b00000000000000000000000000000010 *
+b0000000011 :
+b0000000011 5
+b0000001010 ;
+b0000001010 6
+b0000011110 7
+b0000011110 ?
+#670
+0%
+#690
+0)
+00
+#740
+0(
+0/
+#750
+1%
+b0000001010 ,
+b0000001010 2
+b0000000001 -
+b0000000001 3
+#770
+1)
+10
+b0000000010 <
+b0000000010 9
+b0000011110 >
+b0000011110 8
+b0000100000 4
+b0000100000 .
+b0000100000 =
+#820
+1(
+1/
+b00000000000000000000000000000011 *
+b0000001010 :
+b0000001010 5
+b0000000001 ;
+b0000000001 6
+b0000001010 7
+b0000001010 ?
+#830
+0%
+#850
+0)
+00
+#900
+0(
+0/
+#910
+1%
+b0000000010 ,
+b0000000010 2
+b0000001100 -
+b0000001100 3
+#930
+1)
+10
+b0000100000 <
+b0000100000 9
+b0000001010 >
+b0000001010 8
+b0000101010 4
+b0000101010 .
+b0000101010 =
+#980
+1(
+1/
+b00000000000000000000000000000100 *
+b0000000010 :
+b0000000010 5
+b0000001100 ;
+b0000001100 6
+b0000011000 7
+b0000011000 ?
+#990
+0%
+#1010
+0)
+00
+#1060
+0(
+0/
+#1070
+1%
+b0000000101 ,
+b0000000101 2
+b0000001101 -
+b0000001101 3
+#1090
+1)
+10
+b0000101010 <
+b0000101010 9
+b0000011000 >
+b0000011000 8
+b0001000010 4
+b0001000010 .
+b0001000010 =
+#1140
+1(
+1/
+b00000000000000000000000000000101 *
+b0000000101 :
+b0000000101 5
+b0000001101 ;
+b0000001101 6
+b0001000001 7
+b0001000001 ?
+#1150
+0%
+#1170
+0)
+00
+#1220
+0(
+0/
+#1230
+1%
+bxxxxxxxxxx ,
+bxxxxxxxxxx 2
+bxxxxxxxxxx -
+bxxxxxxxxxx 3
+#1250
+1)
+10
+b0001000010 <
+b0001000010 9
+b0001000001 >
+b0001000001 8
+b0010000011 4
+b0010000011 .
+b0010000011 =
+#1300
+1(
+1/
+b00000000000000000000000000000110 *
+bxxxxxxxxxx :
+bxxxxxxxxxx 5
+bxxxxxxxxxx ;
+bxxxxxxxxxx 6
+bxxxxxxxxxx 7
+bxxxxxxxxxx ?
+#1310
+0%
+#1330
+0)
+00
+#1380
+0(
+0/
+#1390
+1%
+#1410
+1)
+10
+b0010000011 <
+b0010000011 9
+bxxxxxxxxxx >
+bxxxxxxxxxx 8
+bxxxxxxxxxx 4
+bxxxxxxxxxx .
+bxxxxxxxxxx =
+#1460
+1(
+1/
+b00000000000000000000000000000111 *
+#1470
+0%

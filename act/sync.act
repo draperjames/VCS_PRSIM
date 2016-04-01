@@ -1,0 +1,687 @@
+import "globals.act";
+
+export template <pint width>
+defproc gate_exclhi(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] a<2*width> & _v<2*width> -> _u-
+		[keeper=0] b<2*width> & _u<2*width> -> _v-
+		[keeper=0] ~a<4*width> | ~_v<4*width> -> _u+
+		[keeper=0] ~b<4*width> | ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_exclhi_instant(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0; after=0] a<2*width> & _v<2*width> -> _u-
+		[keeper=0; after=0] b<2*width> & _u<2*width> -> _v-
+		[keeper=0; after=0] ~a<4*width> | ~_v<4*width> -> _u+
+		[keeper=0; after=0] ~b<4*width> | ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_exclhi_instant_u(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0; after=0] a<2*width> & _v<2*width> -> _u-
+		[keeper=0] b<2*width> & _u<2*width> -> _v-
+		[keeper=0; after=0] ~a<4*width> | ~_v<4*width> -> _u+
+		[keeper=0] ~b<4*width> | ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_exclhi_instant_v(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] a<2*width> & _v<2*width> -> _u-
+		[keeper=0; after=0] b<2*width> & _u<2*width> -> _v-
+		[keeper=0] ~a<4*width> | ~_v<4*width> -> _u+
+		[keeper=0; after=0] ~b<4*width> | ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_exclhi_reset(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+		[keeper=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+		[keeper=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+		[keeper=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_exclhi_reset_u(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] g.pReset<3*width> | a<3*width> & _v<3*width> -> _u-
+		[keeper=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+		[keeper=0] ~g.sReset<4*width> & (~a<4*width> | ~_v<4*width>) -> _u+
+		[keeper=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_exclhi_reset_v(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+		[keeper=0] g.pReset<3*width> | b<3*width> & _u<3*width> -> _v-
+		[keeper=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+		[keeper=0] ~g.sReset<4*width> & (~b<4*width> | ~_u<4*width>) -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width,reset>
+defproc gate_exclhi_reset_instant(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	[ reset = -1 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0; after=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+			[keeper=0; after=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+			[keeper=0; after=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+			[keeper=0; after=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+		}
+	[] reset = 0 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0; after=0] g.pReset<3*width> | a<3*width> & _v<3*width> -> _u-
+			[keeper=0; after=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+			[keeper=0; after=0] ~g.sReset<4*width> & (~a<4*width> | ~_v<4*width>) -> _u+
+			[keeper=0; after=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+		}
+	[] reset = 1 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0; after=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+			[keeper=0; after=0] g.pReset<3*width> | b<3*width> & _u<3*width> -> _v-
+			[keeper=0; after=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+			[keeper=0; after=0] ~g.sReset<4*width> & (~b<4*width> | ~_u<4*width>) -> _v+
+		}
+	]	
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width,reset>
+defproc gate_exclhi_reset_instant_u(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	[ reset = -1 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0; after=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+			[keeper=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+			[keeper=0; after=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+			[keeper=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+		}
+	[] reset = 0 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0; after=0] g.pReset<3*width> | a<3*width> & _v<3*width> -> _u-
+			[keeper=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+			[keeper=0; after=0] ~g.sReset<4*width> & (~a<4*width> | ~_v<4*width>) -> _u+
+			[keeper=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+		}
+	[] reset = 1 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0; after=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+			[keeper=0] g.pReset<3*width> | b<3*width> & _u<3*width> -> _v-
+			[keeper=0; after=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+			[keeper=0] ~g.sReset<4*width> & (~b<4*width> | ~_u<4*width>) -> _v+
+		}
+	]	
+
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width,reset>
+defproc gate_exclhi_reset_instant_v(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_excllo(_u, _v)
+	}
+
+	[ reset = -1 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+			[keeper=0; after=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+			[keeper=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+			[keeper=0; after=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+		}
+	[] reset = 0 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] g.pReset<3*width> | a<3*width> & _v<3*width> -> _u-
+			[keeper=0; after=0] g._sReset<3*width> & b<3*width> & _u<3*width> -> _v-
+			[keeper=0] ~g.sReset<4*width> & (~a<4*width> | ~_v<4*width>) -> _u+
+			[keeper=0; after=0] ~g._pReset<4*width> | ~b<4*width> | ~_u<4*width> -> _v+
+		}
+	[] reset = 1 ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] g._sReset<3*width> & a<3*width> & _v<3*width> -> _u-
+			[keeper=0; after=0] g.pReset<3*width> | b<3*width> & _u<3*width> -> _v-
+			[keeper=0] ~g._pReset<4*width> | ~a<4*width> | ~_v<4*width> -> _u+
+			[keeper=0; after=0] ~g.sReset<4*width> & (~b<4*width> | ~_u<4*width>) -> _v+
+		}
+	]
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passp<4*width>(_u, _v, u)
+			[keeper=0] _u<width> -> u-
+
+			[keeper=0] passp<4*width>(_v, _u, v)
+			[keeper=0] _v<width> -> v-
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] a<2*width> | _v<2*width> -> _u-
+		[keeper=0] b<2*width> | _u<2*width> -> _v-
+		[keeper=0] ~a<4*width> & ~_v<4*width> -> _u+
+		[keeper=0] ~b<4*width> & ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_instant(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0; after=0] a<2*width> | _v<2*width> -> _u-
+		[keeper=0; after=0] b<2*width> | _u<2*width> -> _v-
+		[keeper=0; after=0] ~a<4*width> & ~_v<4*width> -> _u+
+		[keeper=0; after=0] ~b<4*width> & ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_instant_u(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0; after=0] a<2*width> | _v<2*width> -> _u-
+		[keeper=0] b<2*width> | _u<2*width> -> _v-
+		[keeper=0; after=0] ~a<4*width> & ~_v<4*width> -> _u+
+		[keeper=0] ~b<4*width> & ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_instant_v(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] a<2*width> | _v<2*width> -> _u-
+		[keeper=0; after=0] b<2*width> | _u<2*width> -> _v-
+		[keeper=0] ~a<4*width> & ~_v<4*width> -> _u+
+		[keeper=0; after=0] ~b<4*width> & ~_u<4*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_reset(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] g.pReset<2*width> | a<2*width> | _v<2*width> -> _u-
+		[keeper=0] g.pReset<2*width> | b<2*width> | _u<2*width> -> _v-
+		[keeper=0] ~g.sReset<6*width> & ~a<6*width> & ~_v<6*width> -> _u+
+		[keeper=0] ~g.sReset<6*width> & ~b<6*width> & ~_u<6*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_reset_instant(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0; after=0] g.pReset<2*width> | a<2*width> | _v<2*width> -> _u-
+		[keeper=0; after=0] g.pReset<2*width> | b<2*width> | _u<2*width> -> _v-
+		[keeper=0; after=0] ~g.sReset<6*width> & ~a<6*width> & ~_v<6*width> -> _u+
+		[keeper=0; after=0] ~g.sReset<6*width> & ~b<6*width> & ~_u<6*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_reset_instant_u(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0; after=0] g.pReset<2*width> | a<2*width> | _v<2*width> -> _u-
+		[keeper=0] g.pReset<2*width> | b<2*width> | _u<2*width> -> _v-
+		[keeper=0; after=0] ~g.sReset<6*width> & ~a<6*width> & ~_v<6*width> -> _u+
+		[keeper=0] ~g.sReset<6*width> & ~b<6*width> & ~_u<6*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			_v => v-
+			[after=0] _u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+
+export template <pint width>
+defproc gate_excllo_reset_instant_v(globals g; bool a, b, u, v)
+{
+	bool _u, _v;
+	spec
+	{
+		mk_exclhi(_u, _v)
+	}
+
+	prs <g.Vdd, g.GND>
+	{
+		[keeper=0] g.pReset<2*width> | a<2*width> | _v<2*width> -> _u-
+		[keeper=0; after=0] g.pReset<2*width> | b<2*width> | _u<2*width> -> _v-
+		[keeper=0] ~g.sReset<6*width> & ~a<6*width> & ~_v<6*width> -> _u+
+		[keeper=0; after=0] ~g.sReset<6*width> & ~b<6*width> & ~_u<6*width> -> _v+
+	}
+
+	[ ~LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[after=0] _v => v-
+			_u => u-
+		}
+	[] LAYOUT ->
+		prs <g.Vdd, g.GND>
+		{
+			[keeper=0] passn<2*width>(_u, _v, u)
+			[keeper=0] ~_u<2*width> -> u+
+
+			[keeper=0] passn<2*width>(_v, _u, v)
+			[keeper=0] ~_v<2*width> -> v+
+		}
+	]
+}
+

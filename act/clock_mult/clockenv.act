@@ -1,0 +1,16 @@
+
+defproc source(globals g; a1of1 L)
+{
+	prs {
+		g._sReset&~L.a->L.b+
+		~g._pReset|L.a->L.b-
+	}
+}
+
+define drain (a1of1 R)
+{
+	prs {
+		R.b->R.a+
+		~R.b->R.a-
+	}
+}

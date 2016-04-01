@@ -1,0 +1,182 @@
+import "globals.act";
+import "encoding.act";
+
+// This is the most generic channel type
+export template <pint M, N, O, P>
+defchan channel_Mx1ofN_Ox1ofP <: chan(int) (rail_1ofN<N> x[M]; rail_1ofN<P> y[O])
+{
+	send { }
+	recv { }
+} 
+
+/************************************
+ *									*
+ *			enable channels			*
+ *									*
+ ************************************/
+
+export template <pint M, N>
+defchan eMx1ofN <: chan(int) (channel_Mx1ofN_Ox1ofP<M, N, 1, 1> base; rail_1ofN<N> b[M]; bool e)
+{
+	b = base.x;
+	e = base.y[0].d[0];
+	
+
+	send { }
+	recv { }
+}
+
+export defchan e1of1 <: chan(bool) (channel_Mx1ofN_Ox1ofP<1, 1, 1, 1> base; bool d[1], b, e)
+{
+	b = base.x[0].d[0];
+	e = base.y[0].d[0];
+	d[0] = b;
+
+	send { }
+	recv { }
+}
+
+export defchan e1of2 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 2, 1, 1> base; dualrail b; bool d[2], f, t, e)
+{
+	b.base = base.x[0];
+	f = b.f;
+	t = b.t;
+	e = base.y[0].d[0];
+	d[0] = f;
+	d[1] = t;
+
+	send { }
+	recv { }
+}
+
+export defchan e1of3 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 3, 1, 1> base; trirail b; bool d[3], f, t, c, e)
+{
+	b.base = base.x[0];
+	f = b.f;
+	t = b.t;
+	c = b.c;
+	e = base.y[0].d[0];
+	d[0] = f;
+	d[1] = t;
+	d[2] = c;
+
+    send { }
+    recv { }
+}
+
+export defchan e1of4 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 4, 1, 1> base; quadrail b; bool d[4], ff, ft, tf, tt, e)
+{
+	b.base = base.x[0];
+	ff = b.ff;
+	ft = b.ft;
+	tf = b.tf;
+	tt = b.tt;
+	e = base.y[0].d[0];
+	d[0] = ff;
+	d[1] = ft;
+	d[2] = tf;
+	d[3] = tt;
+
+    send { }
+    recv { }
+}
+
+export defchan e1of2_1of2 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 2, 1, 2> base; dualrail b, e)
+{
+	b.base = base.x[0];
+	e.base = base.y[0];
+
+	send { }
+	recv { }
+}
+
+export defchan e1of2_1of3 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 2, 1, 3> base; dualrail b; trirail e)
+{
+	b.base = base.x[0];
+	e.base = base.y[0];
+
+	send { }
+	recv { }
+}
+
+/************************************
+ *									*
+ *		acknowledge channels		*
+ *									*
+ ************************************/
+
+export template <pint M, N>
+defchan aMx1ofN <: chan(int) (channel_Mx1ofN_Ox1ofP<M, N, 1, 1> base; rail_1ofN<N> b[M]; bool a)
+{
+	b = base.x;
+	a = base.y[0].d[0];
+
+	send { }
+	recv { }
+}
+
+export defchan a1of1 <: chan(bool) (channel_Mx1ofN_Ox1ofP<1, 1, 1, 1> base; bool d[1], b, a)
+{
+	b = base.x[0].d[0];
+	a = base.y[0].d[0];
+	d[0] = b;
+
+	send { }
+	recv { }
+}
+
+export defchan a1of2 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 2, 1, 1> base; dualrail b; bool d[2], f, t, a)
+{
+	b.base = base.x[0];
+	f = b.f;
+	t = b.t;
+	a = base.y[0].d[0];
+	d[0] = f;
+	d[1] = t;
+
+	send { }
+	recv { }
+}
+
+export defchan a1of3 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 3, 1, 1> base; trirail b; bool d[3], f, t, c, a)
+{
+	b.base = base.x[0];
+	f = b.f;
+	t = b.t;
+	c = b.c;
+	a = base.y[0].d[0];
+	d[0] = f;
+	d[1] = t;
+	d[2] = c;
+
+    send { }
+    recv { }
+}
+
+export defchan a1of4 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 4, 1, 1> base; quadrail b; bool d[4], ff, ft, tf, tt, a)
+{
+	b.base = base.x[0];
+	ff = b.ff;
+	ft = b.ft;
+	tf = b.tf;
+	tt = b.tt;
+	a = base.y[0].d[0];
+	d[0] = ff;
+	d[1] = ft;
+	d[2] = tf;
+	d[3] = tt;
+
+    send { }
+    recv { }
+}
+
+export defchan a1of2_1of2 <: chan(int) (channel_Mx1ofN_Ox1ofP<1, 2, 1, 2> base; dualrail b; dualrail a)
+{
+	b.base = base.x[0];
+	a.base = base.y[0];
+
+	send { }
+	recv { }
+}
+
+

@@ -1,0 +1,421 @@
+import "globals.act";
+import "encoding.act";
+import "channel.act";
+import "logic.act";
+
+/*
+ * Continuously sources tokens across the connected channel.
+ *
+ * CHP: *[C!v]
+ */
+export template <pint M, N, O, P; pint v[M]>
+defproc value_exsource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	bool y_valid[O];
+	bool _valid;
+
+	orN<P, false, 2, 10, 10> y_tree[O];
+	cN_reset<O, true, true, 2, 10, 10> v_tree;
+
+	(;i:O: y_tree[i](g, C.y[i].d, y_valid[i]); )
+	v_tree(g, y_valid, _valid);
+
+	(;i:M:
+		prs<g.Vdd, g.GND> { _valid => C.x[i].d[v[i]]- }
+		(;j:N: 
+			[ j != v[i] -> prs<g.Vdd, g.GND> { g.Vdd -> C.x[i].d[j]- } ]
+		)
+	)
+}
+
+export template <pint M, N, O, P; pint v[O]>
+defproc value_eysource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	bool x_valid[M];
+	bool valid;
+
+	orN<P, false, 2, 10, 10> x_tree[M];
+	cN_reset<O, false, false, 2, 10, 10> v_tree;
+
+	(;i:M: x_tree[i](g, C.x[i].d, x_valid[i]); )
+	v_tree(g, x_valid, valid);
+
+	(;i:M: prs<g.Vdd, g.GND> { valid => C.y[i].d[v[i]]- }
+		(;j:N: [ j != v[i] -> prs<g.Vdd, g.GND> { g.Vdd -> C.y[i].d[j]- } ] )
+	)
+}
+
+export template <pint M, N, O, P; pint v[M]>
+defproc value_axsource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	bool y_valid[O];
+	bool valid;
+
+	orN<P, false, 2, 10, 10> y_tree[O];
+	cN_reset<O, false, false, 2, 10, 10> v_tree;
+
+	(;i:O: y_tree[i](g, C.y[i].d, y_valid[i]); )
+	v_tree(g, y_valid, valid);
+
+	(;i:M:
+		prs<g.Vdd, g.GND> { valid => C.x[i].d[v[i]]- }
+		(;j:N: 
+			[ j != v[i] -> prs<g.Vdd, g.GND> { g.Vdd -> C.x[i].d[j]- } ]
+		)
+	)
+}
+
+export template <pint M, N, O, P; pint v[O]>
+defproc value_aysource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	bool x_valid[M];
+	bool _valid;
+
+	orN<P, false, 2, 10, 10> x_tree[M];
+	cN_reset<O, true, true, 2, 10, 10> v_tree;
+
+	(;i:M: x_tree[i](g, C.x[i].d, x_valid[i]); )
+	v_tree(g, x_valid, _valid);
+
+	(;i:M: prs<g.Vdd, g.GND> { _valid => C.y[i].d[v[i]]- }
+		(;j:N: [ j != v[i] -> prs<g.Vdd, g.GND> { g.Vdd -> C.y[i].d[j]- } ] )
+	)
+}
+
+/*
+ * Continuously sources tokens containing random values
+ * across the connected channel.
+ *
+ * CHP: *[C!rand()]
+ */
+export template <pint M, N, O, P>
+defproc random_exsource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	[ ~LAYOUT ->
+		(;i:M: (;j:N: 
+			(;k:N:
+				[ k > j -> spec { mk_exclhi(C.x[i].d[j], C.x[i].d[k]) } ]
+			)
+
+			prs <g.Vdd, g.GND>
+			{
+				~g.sReset & (&:k:O: (|:l:P: C.y[k].d[l] ) ) -> C.x[i].d[j]+
+				g.pReset | (&:k:O: (&:l:P: ~C.y[k].d[l] ) ) -> C.x[i].d[j]-
+			}
+		) )
+	]
+}
+
+export template <pint M, N, O, P>
+defproc random_eysource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	[ ~LAYOUT ->
+		(;i:O: (;j:P:
+			(;k:P:
+				[ k > j -> spec { mk_exclhi(C.y[i].d[j], C.y[i].d[k]) } ]
+			)
+
+			prs <g.Vdd, g.GND>
+			{
+				g.pReset | (&:k:M: (|:l:N: C.x[k].d[l] ) ) -> C.y[i].d[j]-
+				~g.sReset & (&:k:M: (&:l:N: ~C.x[k].d[l] ) ) -> C.y[i].d[j]+
+			}
+		) )
+	]
+}
+
+export template <pint M, N, O, P>
+defproc random_axsource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	[ ~LAYOUT ->
+		(;i:M: (;j:N: 
+			(;k:N:
+				[ k > j -> spec { mk_exclhi(C.x[i].d[j], C.x[i].d[k]) } ]
+			)
+
+			prs <g.Vdd, g.GND>
+			{
+				g.pReset | (&:k:O: (|:l:P: C.y[k].d[l] ) ) -> C.x[i].d[j]-
+				~g.sReset & (&:k:O: (&:l:P: ~C.y[k].d[l] ) ) -> C.x[i].d[j]+
+			}
+		) )
+	]
+}
+
+export template <pint M, N, O, P>
+defproc random_aysource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	[ ~LAYOUT ->
+		(;i:O: (;j:P:
+			(;k:P:
+				[ k > j -> spec { mk_exclhi(C.y[i].d[j], C.y[i].d[k]) } ]
+			)
+
+			prs <g.Vdd, g.GND>
+			{
+				~g.sReset & (&:k:M: (|:l:N: C.x[k].d[l] ) ) -> C.y[i].d[j]+
+				g.pReset | (&:k:M: (&:l:N: ~C.x[k].d[l] ) ) -> C.y[i].d[j]-
+			}
+		) )
+	]
+}
+
+/*
+ * Disconnects the channel
+ * across the connected channel.
+ *
+ * CHP: *[C!rand()]
+ */
+export template <pint M, N, O, P>
+defproc disconnect_exsource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	(;i:M: (;j:N:
+		prs<g.Vdd, g.GND> 
+		{
+			g.Vdd -> C.x[i].d[j]-
+		}
+	) )
+}
+
+export template <pint M, N, O, P>
+defproc disconnect_eysource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	(;i:O: (;j:P: 
+		prs<g.Vdd, g.GND>
+		{ 
+			~g.GND -> C.y[i].d[j]+ 
+		}
+	) )
+}
+
+export template <pint M, N, O, P>
+defproc disconnect_axsource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	(;i:M: (;j:N:
+		prs<g.Vdd, g.GND>
+		{
+			g.Vdd -> C.x[i].d[j]-
+		}
+	) )
+}
+
+export template <pint M, N, O, P>
+defproc disconnect_aysource(globals g; channel_Mx1ofN_Ox1ofP<M, N, O, P> C)
+{
+	(;i:O: (;j:P:
+		prs<g.Vdd, g.GND>
+		{
+			g.Vdd -> C.y[i].d[j]-
+		}
+	) )
+}
+
+
+export template <pint M, N; pint v[M]>
+defproc value_source_eMx1ofN(globals g; eMx1ofN<M, N> C)
+{
+	value_exsource<M, N, 1, 1, v> sub(g, C.base);
+}
+
+export template <pint M, N>
+defproc random_source_eMx1ofN(globals g; eMx1ofN<M, N> C)
+{
+	random_exsource<M, N, 1, 1> sub(g, C.base);
+}
+
+export template <pint M, N>
+defproc disconnect_source_eMx1ofN(globals g; eMx1ofN<M, N> C)
+{
+	disconnect_exsource<M, N, 1, 1> sub(g, C.base);
+}
+
+export template <pint M, N>
+defproc sink_eMx1ofN(globals g; eMx1ofN<M, N> C)
+{
+	random_eysource<M, N, 1, 1> sub(g, C.base);
+}
+
+export template <pint M, N>
+defproc disconnect_sink_eMx1ofN(globals g; eMx1ofN<M, N> C)
+{
+	disconnect_eysource<M, N, 1, 1> sub(g, C.base);
+}
+
+export defproc source_e1of1(globals g; e1of1 C)
+{
+	bool _Ce;
+	prs <g.Vdd, g.GND>
+	{
+		g._sReset & C.e -> _Ce-
+		~g._pReset | ~C.e -> _Ce+
+		~_Ce -> C.b+
+		_Ce -> C.b-
+	}
+}
+
+export defproc disconnect_source_e1of1(globals g; e1of1 C)
+{
+	disconnect_exsource<1, 1, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_e1of1(globals g; e1of1 C)
+{
+	prs <g.Vdd, g.GND>
+	{
+		g._sReset & C.b -> C.e-
+		~g._pReset | ~C.b -> C.e+
+	}
+}
+
+export defproc disconnect_sink_e1of1(globals g; e1of1 C)
+{
+	disconnect_eysource<1, 1, 1, 1> sub(g, C.base);
+}
+
+export template <pint v>
+defproc value_source_e1of2(globals g; e1of2 C)
+{
+	bool _Ce;
+	prs <g.Vdd, g.GND>
+	{
+		g._sReset & C.e -> _Ce-
+		~g._pReset | ~C.e -> _Ce+
+	}
+	[ v = 0 -> prs <g.Vdd, g.GND> {
+		~_Ce -> C.f+
+		_Ce -> C.f-
+		g.Vdd -> C.t-
+    } [] v = 1 -> prs <g.Vdd, g.GND> {
+		~_Ce -> C.t+
+		_Ce -> C.t-
+		g.Vdd -> C.f-
+	} ]
+}
+
+export defproc random_source_e1of2(globals g; e1of2 C)
+{
+	random_exsource<1, 2, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_e1of2(globals g; e1of2 C)
+{
+	prs <g.Vdd, g.GND>
+	{
+		g._sReset & (C.f | C.t) -> C.e-
+		~g._pReset | ~C.f & ~C.t -> C.e+
+	}
+}
+
+export template <pint v>
+defproc value_source_e1of3(globals g; e1of3 C)
+{
+	value_exsource<1, 3, 1, 1, {v}> sub(g, C.base);
+}
+
+export defproc random_source_e1of3(globals g; e1of3 C)
+{
+	random_exsource<1, 3, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_e1of3(globals g; e1of3 C)
+{
+	random_eysource<1, 3, 1, 1> sub(g, C.base);
+}
+
+export template <pint v>
+defproc value_source_e1of4(globals g; e1of4 C)
+{
+	value_exsource<1, 4, 1, 1, {v}> sub(g, C.base);
+}
+
+export defproc random_source_e1of4(globals g; e1of4 C)
+{
+	random_exsource<1, 4, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_e1of4(globals g; e1of4 C)
+{
+	random_eysource<1, 4, 1, 1> sub(g, C.base);
+}
+
+export defproc random_sink_e1of2_1of2(globals g; e1of2_1of2 C)
+{
+	random_eysource<1, 2, 1, 2> sub(g, C.base);
+}
+
+export template <pint M, N; pint v[M]>
+defproc value_source_aMx1ofN(globals g; aMx1ofN<M, N> C)
+{
+	value_axsource<M, N, 1, 1, v> sub(g, C.base);
+}
+
+export template <pint M, N>
+defproc random_source_aMx1ofN(globals g; aMx1ofN<M, N> C)
+{
+	random_axsource<M, N, 1, 1> sub(g, C.base);
+}
+
+export template <pint M, N>
+defproc sink_aMx1ofN(globals g; aMx1ofN<M, N> C)
+{
+	random_aysource<M, N, 1, 1> sub(g, C.base);
+}
+
+export defproc source_a1of1(globals g; a1of1 C)
+{
+	random_axsource<1, 1, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_a1of1(globals g; a1of1 C)
+{
+	random_aysource<1, 1, 1, 1> sub(g, C.base);
+}
+
+export template <pint v>
+defproc value_source_a1of2(globals g; a1of2 C)
+{
+	value_axsource<1, 2, 1, 1, {v}> sub(g, C.base);
+}
+
+export defproc random_source_a1of2(globals g; a1of2 C)
+{
+	random_axsource<1, 2, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_a1of2(globals g; a1of2 C)
+{
+	random_aysource<1, 2, 1, 1> sub(g, C.base);
+}
+
+export template <pint v>
+defproc value_source_a1of3(globals g; a1of3 C)
+{
+	value_axsource<1, 3, 1, 1, {v}> sub(g, C.base);
+}
+
+export defproc random_source_a1of3(globals g; a1of3 C)
+{
+	random_axsource<1, 3, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_a1of3(globals g; a1of3 C)
+{
+	random_aysource<1, 3, 1, 1> sub(g, C.base);
+}
+
+export template <pint v>
+defproc value_source_a1of4(globals g; a1of4 C)
+{
+	value_axsource<1, 4, 1, 1, {v}> sub(g, C.base);
+}
+
+export defproc random_source_a1of4(globals g; a1of4 C)
+{
+	random_axsource<1, 4, 1, 1> sub(g, C.base);
+}
+
+export defproc sink_a1of4(globals g; a1of4 C)
+{
+	random_aysource<1, 4, 1, 1> sub(g, C.base);
+}
+

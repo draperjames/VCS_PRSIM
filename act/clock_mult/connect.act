@@ -1,0 +1,16 @@
+import "globals.act";
+import "encoding.act";
+import "channel.act";
+import "environment.act";
+
+export defproc connect( globals g; bool in,out )
+{
+        bool temp0, temp1, temp2;
+        prs<g.Vdd, g.GND>
+        {	
+		in     -> out+
+		~in    -> out-
+          
+        }
+}
+
