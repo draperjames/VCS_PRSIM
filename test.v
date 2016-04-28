@@ -83,21 +83,7 @@ module mul_add
   end
 
 endmodule
-/*
-module delay 
-#( parameter del
-)
-(
-  input wire in,
-  output reg out
-);  
 
-  always @(in) begin
-    #del out = in;
-  end
-
-endmodule
-*/
 module test;
   reg R1b, R2b;
   wire L2b, Ldb;
@@ -106,17 +92,16 @@ module test;
   reg clk1;
   reg clk2;
   integer counter = 0;
- // wire clk1;
- // wire clk2;
+
   reg reset;
-  reg [ 9 : 0 ] a;
-  reg [ 9 : 0 ] b;
-  wire [ 9 : 0 ] out;
+  reg [ 31 : 0 ] a;
+  reg [ 31 : 0 ] b;
+  wire [ 31 : 0 ] out;
 
   integer a_in[4:0];
   integer b_in[4:0];
 
-  mul_add #( 10, 0 )dut (
+  mul_add #( 32, 0 )dut (
     .clk1 ( clk1 ),
     .clk2 ( clk2 ),
     .reset ( reset ),
@@ -129,26 +114,15 @@ module test;
   initial begin
      $prsim("clock.prs");
 
-//     $to_prsim ("L2b", "L2.b");
-//     $to_prsim ("Ldb", "Ld.b");
      $to_prsim ("nsR", "g._sReset");
      $to_prsim ("npR", "g._pReset");
 
      $from_prsim ( "L1.a", "clk1" );
      $from_prsim ( "L2.a", "clk2" );
-//     $from_prsim ( "R1.b", "R1b" );
-//     $from_prsim ( "R2.b", "R2b" );
      $from_prsim ( "L1.b", "trigger" );
 
   end
-/*
-  delay #(100) dR1b( .in(R1b),
-	      .out(L2b)
-	    );
-  delay #(100) dR2b( .in(R2b),
-	      .out(Rdb)
-            );
-*/
+
   initial begin
 
     counter = 0;

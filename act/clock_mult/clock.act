@@ -6,6 +6,7 @@ import "environment.act";
 export defproc clock_a1of2( globals g; a1of1 L,R )
 {
         bool nLo;
+        bool nLo0, nLo1, nLo2, nLo3;
 	bool e;
         prs<g.Vdd, g.GND>
         {
@@ -17,8 +18,16 @@ export defproc clock_a1of2( globals g; a1of1 L,R )
 		
 		R.b   -> e-
 		~R.b  -> e+
-                ~nLo  -> L.a+
-                nLo   -> L.a-
+//                nLo   -> nLo0-
+//                ~nLo  -> nLo0+
+// 	        nLo0  -> nLo1-
+//                ~nLo0 -> nLo1+
+//                nLo1  -> nLo2-
+//                ~nLo1 -> nLo2+
+//                nLo2  -> nLo3-
+//                ~nLo2 -> nLo3+
+                nLo  -> L.a-
+                ~nLo -> L.a+
         }
 }
 
