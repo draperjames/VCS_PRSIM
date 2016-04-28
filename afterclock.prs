@@ -1,0 +1,116 @@
+= "Ld.a" "d.R.base.y[0].d[0]"
+= "Ld.a" "d.R.a"
+= "Ld.a" "Ld.base.y[0].d[0]"
+= "Ld.a" "c2.in"
+= "Ld.b" "d.R.base.x[0].d[0]"
+= "Ld.b" "d.R.b"
+= "Ld.b" "Ld.base.x[0].d[0]"
+= "Ld.b" "del2.out"
+= "L1.a" "L1.base.y[0].d[0]"
+= "L1.a" "lr1.L.a"
+= "L1.a" "s.L.a"
+= "L1.a" "lr1.L.base.y[0].d[0]"
+= "L1.a" "s.L.base.y[0].d[0]"
+= "L1.b" "L1.base.x[0].d[0]"
+= "L1.b" "lr1.L.b"
+= "L1.b" "s.L.b"
+= "L1.b" "lr1.L.base.x[0].d[0]"
+= "L1.b" "s.L.base.x[0].d[0]"
+= "R1.a" "R1.base.y[0].d[0]"
+= "R1.a" "c1.out"
+= "R1.a" "lr1.R.a"
+= "R1.a" "lr1.R.base.y[0].d[0]"
+= "R1.b" "R1.base.x[0].d[0]"
+= "R1.b" "del1.in"
+= "R1.b" "lr1.R.b"
+= "R1.b" "lr1.R.base.x[0].d[0]"
+= "L2.a" "L2.base.y[0].d[0]"
+= "L2.a" "lr2.L.a"
+= "L2.a" "lr2.L.base.y[0].d[0]"
+= "L2.a" "c1.in"
+= "L2.b" "L2.base.x[0].d[0]"
+= "L2.b" "lr2.L.b"
+= "L2.b" "lr2.L.base.x[0].d[0]"
+= "L2.b" "del1.out"
+= "R2.a" "c2.out"
+= "R2.a" "R2.base.y[0].d[0]"
+= "R2.a" "lr2.R.a"
+= "R2.a" "lr2.R.base.y[0].d[0]"
+= "g.sReset" "del2.g.sReset"
+= "g.sReset" "lr2.g.sReset"
+= "g.sReset" "c1.g.sReset"
+= "g.sReset" "del1.g.sReset"
+= "g.sReset" "lr1.g.sReset"
+= "g.sReset" "c2.g.sReset"
+= "g.sReset" "s.g.sReset"
+= "g.pReset" "del2.g.pReset"
+= "g.pReset" "lr2.g.pReset"
+= "g.pReset" "c1.g.pReset"
+= "g.pReset" "del1.g.pReset"
+= "g.pReset" "lr1.g.pReset"
+= "g.pReset" "c2.g.pReset"
+= "g.pReset" "s.g.pReset"
+= "g.GND" "del2.g.GND"
+= "g.GND" "lr2.g.GND"
+= "g.GND" "c1.g.GND"
+= "g.GND" "del1.g.GND"
+= "g.GND" "lr1.g.GND"
+= "g.GND" "c2.g.GND"
+= "g.GND" "s.g.GND"
+= "g.Vdd" "del2.g.Vdd"
+= "g.Vdd" "lr2.g.Vdd"
+= "g.Vdd" "c1.g.Vdd"
+= "g.Vdd" "del1.g.Vdd"
+= "g.Vdd" "lr1.g.Vdd"
+= "g.Vdd" "c2.g.Vdd"
+= "g.Vdd" "s.g.Vdd"
+= "g._sReset" "del2.g._sReset"
+= "g._sReset" "lr2.g._sReset"
+= "g._sReset" "c1.g._sReset"
+= "g._sReset" "del1.g._sReset"
+= "g._sReset" "lr1.g._sReset"
+= "g._sReset" "c2.g._sReset"
+= "g._sReset" "s.g._sReset"
+= "g._pReset" "del2.g._pReset"
+= "g._pReset" "lr2.g._pReset"
+= "g._pReset" "c1.g._pReset"
+= "g._pReset" "del1.g._pReset"
+= "g._pReset" "lr1.g._pReset"
+= "g._pReset" "c2.g._pReset"
+= "g._pReset" "s.g._pReset"
+= "R2.b" "R2.base.x[0].d[0]"
+= "R2.b" "del2.in"
+= "R2.b" "lr2.R.b"
+= "R2.b" "lr2.R.base.x[0].d[0]"
+"Ld.b" -> "Ld.a"+
+~"Ld.b" -> "Ld.a"-
+"Ld.a" -> "R2.a"+
+~"Ld.a" -> "R2.a"-
+"L2.a" -> "R1.a"+
+~"L2.a" -> "R1.a"-
+"g._sReset" & "lr1.e" & "L1.b" -> "lr1.nLo"-
+"g._sReset" & ~"lr1.nLo" & ~"R1.a" -> "R1.b"+
+~"g._pReset" | ~"lr1.e" & ~"L1.b" -> "lr1.nLo"+
+~"g._pReset" | "lr1.nLo" & "R1.a" -> "R1.b"-
+"R1.b" -> "lr1.e"-
+~"R1.b" -> "lr1.e"+
+"lr1.nLo" -> "L1.a"-
+~"lr1.nLo" -> "L1.a"+
+"g._sReset" & "lr2.e" & "L2.b" -> "lr2.nLo"-
+"g._sReset" & ~"lr2.nLo" & ~"R2.a" -> "R2.b"+
+~"g._pReset" | ~"lr2.e" & ~"L2.b" -> "lr2.nLo"+
+~"g._pReset" | "lr2.nLo" & "R2.a" -> "R2.b"-
+"R2.b" -> "lr2.e"-
+~"R2.b" -> "lr2.e"+
+"lr2.nLo" -> "L2.a"-
+~"lr2.nLo" -> "L2.a"+
+"g._sReset" & ~"L1.a" -> "L1.b"+
+~"g._pReset" | "L1.a" -> "L1.b"-
+"g._sReset" & "R1.b" -> "del1.temp0"-
+~"g._pReset" | ~"R1.b" -> "del1.temp0"+
+after 4000 "del1.temp0" -> "L2.b"-
+after 4000 ~"del1.temp0" -> "L2.b"+
+"g._sReset" & "R2.b" -> "del2.temp0"-
+~"g._pReset" | ~"R2.b" -> "del2.temp0"+
+after 4000 "del2.temp0" -> "Ld.b"-
+after 4000 ~"del2.temp0" -> "Ld.b"+

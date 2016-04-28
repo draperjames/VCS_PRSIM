@@ -4193,7 +4193,7 @@ module test;
   end
 
   initial begin
-     $prsim("clock.prs");
+     $prsim("afterclock.prs");
 
      $to_prsim ("nsR", "g._sReset");
      $to_prsim ("npR", "g._pReset");
