@@ -4188,6 +4188,9 @@ module test;
     .out ( out )
   );
 
+  initial begin
+     $sdf_annotate("Top.mapped.sdf", dut);
+  end
 
   initial begin
      $prsim("clock.prs");
